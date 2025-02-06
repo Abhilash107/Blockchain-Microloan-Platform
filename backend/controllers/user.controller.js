@@ -246,31 +246,31 @@ const refreshAccessToken = asyncHandler( async (req, res)=>{
 } )
 
 
-const changeCurrentPassword = asyncHandler(async (req, res) =>{
-    const {oldPassword, newPassword} = req.body;
+// const changeCurrentPassword = asyncHandler(async (req, res) =>{
+//     const {oldPassword, newPassword} = req.body;
 
-    //get user._id from DB
-    const user = await User.findById(req.user?._id)
-    //isPasswordCorrect method is defined in user.models.js 
+//     //get user._id from DB
+//     const user = await User.findById(req.user?._id)
+//     //isPasswordCorrect method is defined in user.models.js 
 
-    const isPasswordCorrect =  await user.isPasswordCorrect(oldPassword)
+//     const isPasswordCorrect =  await user.isPasswordCorrect(oldPassword)
 
-    if(!isPasswordCorrect){
-        throw new ApiError(400, "Invalid old password")
-    }
+//     if(!isPasswordCorrect){
+//         throw new ApiError(400, "Invalid old password")
+//     }
 
-    //set newPassword to user's password 
-    user.password = newPassword
-    //Now save it in the DB
-    await user.save({ validateBeforeSave: false })
+//     //set newPassword to user's password 
+//     user.password = newPassword
+//     //Now save it in the DB
+//     await user.save({ validateBeforeSave: false })
 
-    return res
-    .status(200)
-    .json(
-        new ApiResponse(200, {}, "Password changed successfully")
-    )
+//     return res
+//     .status(200)
+//     .json(
+//         new ApiResponse(200, {}, "Password changed successfully")
+//     )
 
-})
+// })
 
 
 const getCurrentUser = asyncHandler(async(req, res)=>{
@@ -320,7 +320,7 @@ const updateAccountDetails = asyncHandler(async (req, res)=>{
 
 
 
-export { registerUser, loginUser, logOutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails, };
+export { registerUser, loginUser, logOutUser, refreshAccessToken, getCurrentUser, updateAccountDetails };
 
 
 
