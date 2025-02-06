@@ -1,26 +1,70 @@
-import axios from "axios";  // Import axios to make HTTP requests
+import axios from 'axios';
+import asyncHandler from "../utils/asyncHandler.js";
+import ApiError from "../utils/ApiError.js";
+import { User } from "../models/user.models.js";
 
-export const verifyAadhaar = async (req, res) => {
-  try {
-    const { file } = req;
+// Controller to request and verify Aadhaar OTP in one flow
 
-    if (!file) {
-      return res.status(400).json({ error: "No file uploaded" });
+const aadhaarVerification = asyncHandler(async (req, res) => {
+    const { aadhaarNumber, otp } = req.body;
+
+    // Validate Aadhaar number format
+    if (!aadhaarNumber || !aadhaarNumber.match(/^\d{12}$/)) {
+        throw new ApiError(400, "Invalid Aadhaar number format");
     }
 
-    const formData = new FormData();
-    formData.append("image", file.buffer, file.originalname);
+    // Case 1: If OTP is not provided, request OTP
+    if (!otp) {
+        // Request OTP from third-party provider
+        try {
+            const otpResponse = await axios.post('https://thirdpartyprovider.com/aadhaar/otp', {
+                aadhaarNumber: aadhaarNumber,
+            });
 
-    // Send the file to Python API (assuming Python server is running on port 5001)
-    const response = await axios.post("http://localhost:5001/verify-aadhaar", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+            if (otpResponse.data.success) {
+                return res.status(200).json({
+                    message: "OTP sent successfully. Please check your mobile number."
+                });
+            } else {
+                throw new ApiError(500, "Failed to send OTP");
+            }
+        } catch (error) {
+            throw new ApiError(500, error.message || "Error requesting OTP");
+        }
+    }
 
-    return res.json(response.data);  // Return data from Python API to the frontend
-  } catch (error) {
-    console.error("Error verifying Aadhaar:", error);
-    res.status(500).json({ error: "Aadhaar verification failed" });
-  }
-};
+    // Case 2: If OTP is provided, verify OTP
+    if (otp) {
+        try {
+            // Verify OTP with third-party provider
+            const verifyResponse = await axios.post('https://thirdpartyprovider.com/aadhaar/verify', {
+                aadhaarNumber: aadhaarNumber,
+                otp: otp,
+            });
+
+            if (verifyResponse.data.success) {
+                // OTP successfully verified, mark Aadhaar details as verified
+                const user = await User.findOne({ "aadhaarDetails.aadhaarNumber": aadhaarNumber });
+
+                if (user) {
+                    user.aadhaarDetails.isVerified = true;
+                    await user.save();
+                    return res.status(200).json({ message: "Aadhaar verification successful" });
+                } else {
+                    throw new ApiError(404, "User not found with this Aadhaar number");
+                }
+            } else {
+                throw new ApiError(400, "Invalid OTP or Aadhaar number");
+            }
+        } catch (error) {
+            throw new ApiError(500, error.message || "Error verifying OTP");
+        }
+    }
+});
+
+
+
+
+
+export { aadhaarVerification };
+

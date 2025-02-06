@@ -28,9 +28,6 @@ const userSchema = new Schema({
         type:String,
         required: true,
     },
-    coverImage:{//todo
-        type:String,
-    },
     password: {
         type:String,
         required: [true, 'password is required'],
@@ -40,11 +37,64 @@ const userSchema = new Schema({
     },
     ethAddress: {
         type: String,
-        unique: true,  // Each user should have a unique Ethereum address
-        sparse: true,  // Allows some users to have no Ethereum address
+        unique: true,  // Each user should have a unique Ethereum address  // Allows some users to have no Ethereum address
         trim: true,
         match: /^0x[a-fA-F0-9]{40}$/, // Validates Ethereum address format
-    }
+    },
+    // aadhaarDetails: {
+    //     aadhaarNumber: {
+    //         type: String,
+    //         unique: true,
+    //         match: /^\d{12}$/, // Match 12-digit Aadhaar number
+    //         sparse: true, // Makes this field optional at first
+    //     },
+    //     fullNameAsPerAadhaar: {
+    //         type: String,
+    //         trim: true,
+    //     },
+    //     gender: {
+    //         type: String,
+    //         enum: ['Male', 'Female', 'Other'],
+    //     },
+    //     dob: {
+    //         type: Date,
+    //     },
+    //     mobileNumber: {
+    //         type: String,
+    //         match: /^[0-9]{10}$/, // Match 10-digit mobile number
+    //     },
+    //     address: {
+    //         street: {
+    //             type: String,
+    //             required: true,
+    //             trim: true,
+    //         },
+    //         city: {
+    //             type: String,
+    //             required: true,
+    //             trim: true,
+    //         },
+    //         state: {
+    //             type: String,
+    //             required: true,
+    //             trim: true,
+    //         },
+    //         postalCode: {
+    //             type: String,
+    //             required: true,
+    //             match: /^[0-9]{6}$/, // Match 6-digit postal code
+    //         },
+    //         country: {
+    //             type: String,
+    //             required: true,
+    //             trim: true,
+    //         },
+    //     },
+    // },
+    // isVerified: {
+    //     type: Boolean,
+    //     default: false
+    // }
 
 }, {timestamps: true})
 
